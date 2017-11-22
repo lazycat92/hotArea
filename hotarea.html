@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>关于热区</title>
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0;
+			}
+			
+			img {
+				width: 100%;
+				height: 100%;
+				display: block;
+				margin: 0 auto;
+				z-index: 0;
+			}
+			
+			.hotarea {
+				position: relative;
+				top: 0;
+				left: 0;
+				padding: 0;
+				width: 600px;
+				height: 700px;
+				margin: 0 auto;
+			}
+			
+			.hotarea a {
+				display: block;
+				position: absolute;
+				background: black;
+				opacity: .5;
+			}
+			
+			.btns {
+				text-align: center;
+				margin: 20px auto;
+			}
+			
+			button {
+				margin-right: 50px;
+			}
+
+			.hotarea-opt {
+				width: 600px;
+				margin: 0 auto;
+			}
+
+			.hotarea-opt ul {
+				list-style-type: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="btns">
+			<button data-index="1">添加热区</button>
+			<button data-index="2">确定热区</button>
+			<button data-index="3">编辑热区</button>
+		</div>
+
+		<div class="hotarea">
+			<img src="images/下载.png" />
+		</div>
+
+		<div class="hotarea-opt">
+			<ul>
+			</ul>
+		</div>
+		<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+
+		<script type="text/javascript">
+			window.onload = function() {
+				var box = document.querySelector("div.hotarea");
+				var img = document.querySelector("img");
+				var optList = document.querySelector("ul");
+
+				var offsetLeft = box.offsetLeft;
+				var offsetTop = box.offsetTop;
+				var startX, startY, endX, endY , areaX, areaY, links, len;
+
+				var btns = document.getElementsByTagName("button");
+
+				var p = {};
+				var positions = [];
+
+				document.addEventListener("mousemove", function(e) {
+					e.preventDefault();
+				}, false);
+
+				for(let i = 0; i < btns.length; i++) {
+					btns[i].addEventListener("click", function(e) {
+						var $this = e.target;
+						var index = $this.dataset.index;
+
+						if(index == 1) {
+							//							console.log("添加");
+							img.addEventListener("mousedown", getStartPosition, false);
+//							img.addEventListener("mousemove", getMove, false);
+							img.addEventListener("mouseup", getEndPosition, false);
+						} else if(index == 2) {
+							//							console.log("确定")
+							img.removeEventListener("mousedown", getStartPosition);
+							img.removeEventListener("mousemove", getMove, false);
+//							img.removeEventListener("mouseup", getEndPosition);
+						} else if(index == 3) {
+							//							console.log("编辑")
+						}
+
+					});
+				}
+
+				function getStartPosition(e) {
+					e.stopPropagation();
+					e.preventDefault();
+					startX = e.clientX - offsetLeft;
+					startY = e.clientY - offsetTop;
+					
+					var _link = document.createElement("a");
+					_link.href = "javascript:;";
+					_link.style.top = startY + "px";
+					_link.style.left = startX + "px";
+
+					var li = document.createElement("li");
+					li.dataset.index = len ? len : 0; 
+					var input = document.createElement("input");
+					var btn1 = document.createElement("button");
+					btn1.innerHTML = "生成链接";
+
+					var btn2 = document.createElement("button");
+					btn2.innerHTML = "删除热区";
+
+					li.appendChild(input);
+					optList.appendChild(li);
+
+					box.appendChild(_link);
+
+					img.addEventListener("mousemove", getMove, false);
+				}
+
+
+				// 生成热区区域
+				function getMove(e) {
+					links = document.querySelectorAll("a");
+					len = links.length;
+
+					endX = e.clientX - offsetLeft;
+					endY = e.clientY - offsetTop;
+
+					areaX = Math.abs(endX - startX);
+					areaY = Math.abs(endY - startY);
+
+					links[len-1].style.width = areaX + "px";
+					links[len-1].style.height = areaY + "px";
+					links[len-1].style.zIndex = len;
+				}
+
+				// 给热区设置链接				
+				function getOperation() {
+
+				}
+
+
+				// 鼠标按下的时候就在
+				function a() {
+					var _link = document.createElement("a");
+					_link.href = "javascript:;";
+					_link.style.top = startY + "px";
+					_link.style.left = startX + "px";
+					_link.style.zIndex = len + 1;
+				}
+
+				function getEndPosition(e) {
+					img.removeEventListener("mousemove", getMove, false);
+					e.stopPropagation();
+					e.preventDefault();
+					// endX = e.clientX - offsetLeft;
+					// endY = e.clientY - offsetTop;
+					// addArea();
+					// p.ex = endX;
+					// p.ey = endY;
+					// positions.push(p);
+					// p = {};
+
+					// var poslen = positions.length;
+					//				if(poslen > 0) {
+					//					for(var k=0; k < poslen; k++) {
+					//						var pos = positions[k];
+					//						if((startX >= pos.sx && startX < pos.ex) && ((startY >= pos.sy && startY < pos.ey))) {
+					//							
+					//						}
+					//					}
+					//				} else {
+					//					return ;
+					//				}
+				}
+				
+
+				function addArea() {
+					var a = document.querySelectorAll("a");
+					var len = a.length;
+					var areaX = Math.abs(endX - startX);
+					var areaY = Math.abs(endY - startY);
+
+					var newlabel = document.createElement("a");
+					newlabel.href = "javascript:;";
+					newlabel.style.width = areaX + "px";
+					newlabel.style.height = areaY + "px";
+					newlabel.style.top = startY + "px";
+					newlabel.style.left = startX + "px";
+					newlabel.style.zIndex = len + 1;
+
+					var resize = document.createElement("i"); // 用来缩放大小
+					newlabel.appendChild(resize);
+
+					box.appendChild(newlabel);
+				}
+			}
+		</script>
+	</body>
+
+</html>
