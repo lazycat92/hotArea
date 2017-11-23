@@ -27,13 +27,36 @@
 				width: 600px;
 				height: 700px;
 				margin: 0 auto;
+				overflow: hidden;
 			}
 			
 			.hotarea a {
 				display: block;
 				position: absolute;
-				background: black;
-				opacity: .5;
+				background:rgba(0, 0, 0, .5);
+			}
+
+			.hotarea a:hover {
+				cursor: move;
+			}
+
+			.hotarea a span {
+				display: block;
+				float: left;
+				color: #fff;
+				width: 20px;
+				height: 20px;
+				background: orange;
+				text-align: center
+			}
+
+			.hotarea a i {
+				display: block;
+				width: 10px;
+				height: 10px;
+				cursor: se-resize;
+				position: absolute;
+				background: #fff;
 			}
 			
 			.btns {
@@ -50,8 +73,12 @@
 				margin: 0 auto;
 			}
 
-			.hotarea-opt ul {
-				list-style-type: none;
+			
+			.hotarea-opt ol li {
+				margin: 10px auto;
+			}
+			.hotarea-opt ol li input {
+				margin-right: 20px;
 			}
 		</style>
 	</head>
@@ -59,8 +86,7 @@
 	<body>
 		<div class="btns">
 			<button data-index="1">添加热区</button>
-			<button data-index="2">确定热区</button>
-			<button data-index="3">编辑热区</button>
+			<button data-index="2">生成热区</button>
 		</div>
 
 		<div class="hotarea">
@@ -68,8 +94,8 @@
 		</div>
 
 		<div class="hotarea-opt">
-			<ul>
-			</ul>
+			<ol>
+			</ol>
 		</div>
 		<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
 
@@ -77,11 +103,11 @@
 			window.onload = function() {
 				var box = document.querySelector("div.hotarea");
 				var img = document.querySelector("img");
-				var optList = document.querySelector("ul");
+				var optList = document.querySelector("ol");
 
 				var offsetLeft = box.offsetLeft;
 				var offsetTop = box.offsetTop;
-				var startX, startY, endX, endY , areaX, areaY, links, len;
+				var startX, startY, endX, endY , areaX, areaY, links, len, delbtns;
 
 				var btns = document.getElementsByTagName("button");
 
@@ -94,26 +120,20 @@
 
 				for(let i = 0; i < btns.length; i++) {
 					btns[i].addEventListener("click", function(e) {
+						e.preventDefault();
 						var $this = e.target;
 						var index = $this.dataset.index;
 
 						if(index == 1) {
-							//							console.log("添加");
 							img.addEventListener("mousedown", getStartPosition, false);
-//							img.addEventListener("mousemove", getMove, false);
-							img.addEventListener("mouseup", getEndPosition, false);
+							document.addEventListener("mouseup", getEndPosition, false);
 						} else if(index == 2) {
-							//							console.log("确定")
 							img.removeEventListener("mousedown", getStartPosition);
-							img.removeEventListener("mousemove", getMove, false);
-//							img.removeEventListener("mouseup", getEndPosition);
-						} else if(index == 3) {
-							//							console.log("编辑")
-						}
+							setLink();
+						} 
 
 					});
 				}
-
 				function getStartPosition(e) {
 					e.stopPropagation();
 					e.preventDefault();
@@ -121,24 +141,24 @@
 					startY = e.clientY - offsetTop;
 					
 					var _link = document.createElement("a");
+					var li = document.createElement("li");
+					
+					var str = "<input type='text' /><button class='delete' data-index='" + (len ? len : 0) + "'>删除热区</button>"
+					var str1 = "<span>" + (len ? len + 1 : 1) + "</span>";
+					var resizeIcon = document.createElement("i");
+
 					_link.href = "javascript:;";
 					_link.style.top = startY + "px";
 					_link.style.left = startX + "px";
+					_link.innerHTML = str1;
 
-					var li = document.createElement("li");
 					li.dataset.index = len ? len : 0; 
-					var input = document.createElement("input");
-					var btn1 = document.createElement("button");
-					btn1.innerHTML = "生成链接";
-
-					var btn2 = document.createElement("button");
-					btn2.innerHTML = "删除热区";
-
-					li.appendChild(input);
+					
+					li.innerHTML = str;
+					_link.appendChild(resizeIcon);
 					optList.appendChild(li);
-
 					box.appendChild(_link);
-
+					
 					img.addEventListener("mousemove", getMove, false);
 				}
 
@@ -157,68 +177,113 @@
 					links[len-1].style.width = areaX + "px";
 					links[len-1].style.height = areaY + "px";
 					links[len-1].style.zIndex = len;
+
+					// 生成resize按钮
+					links[len-1].children[1].style.bottom = 0;
+					links[len-1].children[1].style.right = 0;
 				}
 
 				// 给热区设置链接				
-				function getOperation() {
+				function setLink() {
+					var input_list = document.querySelectorAll("input");
+					var input_len = input_list.length;
 
-				}
+					for(let i=0; i < input_len; i++ ) {
+						var val = input_list[i].value;
+						var txt = document.createTextNode(val);
+						links[i].appendChild(txt);
+						links[i].href = val;
+					}
 
-
-				// 鼠标按下的时候就在
-				function a() {
-					var _link = document.createElement("a");
-					_link.href = "javascript:;";
-					_link.style.top = startY + "px";
-					_link.style.left = startX + "px";
-					_link.style.zIndex = len + 1;
 				}
 
 				function getEndPosition(e) {
 					img.removeEventListener("mousemove", getMove, false);
 					e.stopPropagation();
 					e.preventDefault();
-					// endX = e.clientX - offsetLeft;
-					// endY = e.clientY - offsetTop;
-					// addArea();
-					// p.ex = endX;
-					// p.ey = endY;
-					// positions.push(p);
-					// p = {};
-
-					// var poslen = positions.length;
-					//				if(poslen > 0) {
-					//					for(var k=0; k < poslen; k++) {
-					//						var pos = positions[k];
-					//						if((startX >= pos.sx && startX < pos.ex) && ((startY >= pos.sy && startY < pos.ey))) {
-					//							
-					//						}
-					//					}
-					//				} else {
-					//					return ;
-					//				}
+					editArea();
+					delItem();
 				}
+
+				function delItem(e) {
+					delbtns = document.querySelectorAll("button.delete");
+					var l = delbtns.length ;
+					optList = document.querySelector("ol");
+
+					for(let k=0; k < l; k++) {
+						delbtns[k].addEventListener("click", function(e) {
+							e.preventDefault();
+							e.stopPropagation();
+							var index = e.target.dataset.index;
+							console.log(e);
+
+							console.log(e.target.parentNode);
+
+							e.target.parentNode.parentElement.removeChild(e.target.parentNode);
+							box.removeChild(links[index]);
+
+							updateDom();
+						},false);
+					}
+				}
+
 				
+				function updateDom() {
+					links = document.querySelectorAll("a");
+					len = links.length;
 
-				function addArea() {
-					var a = document.querySelectorAll("a");
-					var len = a.length;
-					var areaX = Math.abs(endX - startX);
-					var areaY = Math.abs(endY - startY);
+					var li_list = document.querySelectorAll("li");
 
-					var newlabel = document.createElement("a");
-					newlabel.href = "javascript:;";
-					newlabel.style.width = areaX + "px";
-					newlabel.style.height = areaY + "px";
-					newlabel.style.top = startY + "px";
-					newlabel.style.left = startX + "px";
-					newlabel.style.zIndex = len + 1;
+					for(let i=0; i < len; i++) {
+						links[i].childNodes[0].innerHTML = (i+1);
+						links[i].style.zIndex = i+1;
+						li_list[i].dataset.index = i;
+					}
 
-					var resize = document.createElement("i"); // 用来缩放大小
-					newlabel.appendChild(resize);
-
-					box.appendChild(newlabel);
 				}
+
+
+
+				function editArea() {
+					for(let i=0; i <len ; i++) {
+						var area = links[i];
+						area.style.backgroundColor = "rgba(255, 255, 255, .5)";
+
+
+						var sx, sy, top, left;
+
+						area.addEventListener('mousedown', function(e) {
+							e.preventDefault();
+							let _this = e.target;
+							
+							// 点击时候鼠标的位置
+							sx = e.clientX;
+							sy = e.clientY;
+							top = parseFloat(e.target.style.top);
+							left = parseFloat(e.target.style.left);
+							// 移动时候鼠标的位置
+
+							area.addEventListener("mousemove", c, false);
+						}, false);
+
+						area.addEventListener('mouseup', function(e){
+							e.preventDefault();
+							let _this = e.target;
+							area.removeEventListener("mousemove", c);
+						}, false);
+
+						function c(e) {
+							
+							let xx = e.clientX;
+							let yy = e.clientY;
+
+							e.target.style.top = (top + yy - sy) + "px";
+							e.target.style.left = (left + xx - sx) + "px";
+
+						}
+					}
+				}
+
 			}
 		</script>
 	</body>
